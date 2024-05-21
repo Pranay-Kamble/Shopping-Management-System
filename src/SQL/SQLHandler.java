@@ -7,7 +7,6 @@ import Classes.Product;
 import Exceptions.CustomerAlreadyPresent;
 import Exceptions.InvalidPhoneNumberException;
 
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -154,7 +153,6 @@ public class SQLHandler {
         }
 
         else if (productsData.size() > updatedProductsData.size()){ //Means some products are deleted
-            System.out.println("inside else if");
             for (Product i : productsData){
                 if (!updatedProductsData.contains(i)){
                     try {
@@ -249,7 +247,7 @@ public class SQLHandler {
      */
     public boolean isUserPresent(String phoneNumber) {
 
-        for (Customer i: customersData){  // check for presence
+        for (Customer i: updatedCustomersData){  // check for presence
             if (i.getPhoneNumber().equalsIgnoreCase(phoneNumber))
                 return true;
         }
@@ -263,8 +261,9 @@ public class SQLHandler {
      */
     public boolean isProductPresent(String productId){
         SQLHandler.productsData.clear();
+        SQLHandler.updatedProductsData.clear();
         SQLHandler.getProductData();
-        for (Product i: productsData){
+        for (Product i: updatedProductsData){
             if (i.getId().equalsIgnoreCase(productId))
                 return true;
         }
@@ -317,7 +316,7 @@ public class SQLHandler {
      * @return The corresponding product object or null if not present
      */
     public Product getProduct(String productId){
-        for (Product i: productsData){
+        for (Product i: updatedProductsData){
             if(i.getId().equalsIgnoreCase(productId))
                 return i;
         }
@@ -341,7 +340,11 @@ public class SQLHandler {
         }
     }
 
-
+    /**
+     * Adds new item to database
+     * @param newProduct New Product object to be added
+     * @return booleam
+     */
     private static boolean addItem(Product newProduct){
         try {
             updatedProductsData.add(newProduct);
@@ -372,12 +375,10 @@ public class SQLHandler {
      */
     public void updateCustomerData(Customer customer){
         for (Customer i: updatedCustomersData){
-
             if (i.equals(customer)){
                 i.addMoneySpent(customer.getMoneySpent());
             }
         }
-//        SQLHandler.updateCustomerDB();
     }
 
     public void billingProcess(){
@@ -603,7 +604,11 @@ public class SQLHandler {
         }
         return false;
     }
-
+    /**
+     * Takes an object compares it with existing data and updates changes
+     * @param product product object to update
+     * @return boolean
+     */
     public boolean updateItem(Product product){
         for (int j = 0; j < updatedProductsData.size(); j++) {
 

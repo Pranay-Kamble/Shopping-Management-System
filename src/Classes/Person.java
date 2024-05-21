@@ -1,6 +1,5 @@
 package Classes;
 
-import java.util.InputMismatchException;
 
 public abstract class Person {
     protected String name;
@@ -12,6 +11,5 @@ public abstract class Person {
     }
 
     Person(){ }
-
 
 }
