@@ -1,10 +1,11 @@
 package Classes;
 
+
 public final class Customer extends Person {
     private static int ID = 1;
     private String phoneNumber;
     private String password;
-    private String custId = "C-";
+    private String custId = "C";
     private double moneySpent;
 
     public Customer() { } //Default Constructor
@@ -25,7 +26,8 @@ public final class Customer extends Person {
     public String getPassword() {
         return this.password;
     }
-    public String getCustId() {
+    public int getAge() { return this.age; }
+    public String getId() {
         return this.custId;
     }
     public String getPhoneNumber(){
@@ -34,9 +36,11 @@ public final class Customer extends Person {
     public double getMoneySpent(){
         return this.moneySpent;
     }
+    public String getName() { return this.name; }
+
 
     public void display() {
-        System.out.println("Name: " + this.name +  "\nID: " + this.custId + "\nAge: " + this.age + "\nPhone Number: " + this.phoneNumber + "\nPassword: " + this.password);
+        System.out.println("\nUser Name: " + this.name +  "\nUser ID: " + this.custId + "\nAge: " + this.age + "\nPhone Number: " + this.phoneNumber);
     }
 
     public boolean isValid(){
@@ -46,4 +50,7 @@ public final class Customer extends Person {
         return true;
     }
 
+    public boolean equals(Customer c){
+        return this.name.equals(c.name) && this.age == c.age && this.password.equals(c.password) && this.phoneNumber.equals(c.phoneNumber);
+    }
 }
