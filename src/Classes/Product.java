@@ -1,7 +1,12 @@
 package Classes;
 
+import SQL.SQLHandler;
+
 public final class Product {
-    private static int ID = 1;
+    private static int ID;
+    static {
+        ID = SQLHandler.initialProducts + 1;
+    }
 
     private String name;
     private double price;
@@ -18,11 +23,22 @@ public final class Product {
 
     public Product() { }
 
+    public Product(Product copy) {
+        this.productId = copy.productId;
+        this.name = copy.name;
+        this.price = copy.price;
+        this.quantity = copy.quantity;
+    }
+
     public Product(String name, double price, int quantity){
         this.name = name;
         this.price = price;
         this.quantity = quantity;
         this.productId = this.productId + (Product.ID++);
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public Product(String productId, String name, double price, int quantity){
@@ -31,8 +47,15 @@ public final class Product {
     }
 
     public String toString(){
-        return String.format("%-6s - %-15s - %-8.3f - %-5d", this.productId, this.name,this.price, this.quantity);
+        return String.format("| %-6s | %-15s | %-8.3f | %-8d |", this.productId, this.name,this.price, this.quantity);
 
+    }
+
+    public boolean equals(Object other){
+        if (other instanceof Product){
+            return this.productId.equalsIgnoreCase(((Product)other).productId);
+        }
+        return false;
     }
 
 }

@@ -14,17 +14,25 @@ public class SQLHandler {
     private static final String User = "root";
     private static final String Password = "password";
     private static Connection connection = null;
-
     private static ArrayList<Customer> customersData = new ArrayList<>();
     private static ArrayList<Customer> updatedCustomersData = new ArrayList<>();
     private static ArrayList<Product> productsData = new ArrayList<>();
     private static ArrayList<Product> updatedProductsData = new ArrayList<>();
+
+    public static int initialCustomers;
+    public static int initialProducts;
+    /*
+      Initialises the DataBase Connection
+      and Retrieves any existing Data from the DataBase
+     */
 
     static {
         try {
             connection = DriverManager.getConnection(URL,User,Password);
             SQLHandler.getCustomerData();
             SQLHandler.getProductData();
+            initialCustomers = customersData.size();
+            initialProducts = productsData.size();
             System.out.println("DataBase Connection established Successfully");
         } catch (SQLException e) {
             System.out.println("Database Connection Failed.");
@@ -43,17 +51,21 @@ public class SQLHandler {
             String query = "SELECT ID,NAME,AGE,PHONENUMBER,PASSWORD,MONEYSPENT FROM USERS";
             ResultSet result = statement.executeQuery(query);
 
+            customersData.clear();
             while (result.next()) {
                 customersData.add(new Customer(result.getString(1), result.getString(2), result.getInt(3), result.getString(4), result.getString(5), result.getDouble(6)));
             }
+            if (customersData.size() > updatedCustomersData.size() || updatedCustomersData.isEmpty()) {
 
-            for (Customer customer : customersData) {
-                updatedCustomersData.add(customer);
+                for (Customer customer : customersData) {
+                    updatedCustomersData.add(customer);
+                }
             }
         }catch (SQLException e) {
             System.out.println("SQLException occurred in SQLHandler.getCustomerData(). Exception message: " + e.getMessage());
         }
     }
+//TODO the newly created account is visible in the updatedCustomerData array twice why is this happening find and fix the bug
 
     /**
      * Handles all the updation of data in user database, it can add new data and also update existing data
@@ -64,6 +76,7 @@ public class SQLHandler {
         String updateQuery = "UPDATE USERS SET NAME = ? , AGE = ? , PHONENUMBER = ? , PASSWORD = ? , MONEYSPENT = ? WHERE ID = ?";
         PreparedStatement addStatement = null;
         PreparedStatement updateStatement = null;
+        System.out.println("Static customer id: " +  Customer.ID);
         try {
             addStatement = connection.prepareStatement(addQuery);
             updateStatement = connection.prepareStatement(updateQuery);
@@ -73,7 +86,18 @@ public class SQLHandler {
 
         if (customersData.size() < updatedCustomersData.size()){  //This means new customer have been added
             try {
+                System.out.println("Printing customer data array");
+                for (int i = 0; i < customersData.size(); i++) {
+                    System.out.println("Cust ID: " +  customersData.get(i).getId() + "\nName : " + customersData.get(i).getName() + "\nAge : " + customersData.get(i).getAge() + "\nPhoneNumber : " + customersData.get(i).getPhoneNumber() + "\nPassword : " + customersData.get(i).getPassword() + "\nMoneySpent : " + customersData.get(i).getMoneySpent());
+                }
+
+                System.out.println("Printing updated data array");
+                for (int i = 0; i < updatedCustomersData.size(); i++) {
+                    System.out.println("Cust ID: " +  updatedCustomersData.get(i).getId() + "\nName : " + updatedCustomersData.get(i).getName() + "\nAge : " + updatedCustomersData.get(i).getAge() + "\nPhoneNumber : " + updatedCustomersData.get(i).getPhoneNumber() + "\nPassword : " + updatedCustomersData.get(i).getPassword() + "\nMoneySpent : " + updatedCustomersData.get(i).getMoneySpent());
+                }
+
                 for (int i = customersData.size(); i < updatedCustomersData.size(); ++i) {
+                    System.out.println("Cust ID: " +  updatedCustomersData.get(i).getId() + "\nName : " + updatedCustomersData.get(i).getName() + "\nAge : " + updatedCustomersData.get(i).getAge() + "\nPhoneNumber : " + updatedCustomersData.get(i).getPhoneNumber() + "\nPassword : " + updatedCustomersData.get(i).getPassword() + "\nMoneySpent : " + updatedCustomersData.get(i).getMoneySpent());
                     addStatement.setString(1, updatedCustomersData.get(i).getId());
                     addStatement.setString(2,updatedCustomersData.get(i).getName());
                     addStatement.setInt(3,updatedCustomersData.get(i).getAge());
@@ -102,6 +126,13 @@ public class SQLHandler {
                 }
             }
         }
+        customersData.clear();
+        updatedCustomersData.clear();
+        productsData.clear();
+        updatedProductsData.clear();
+        getCustomerData();
+        getProductData();
+
     }
 
     /**
@@ -130,7 +161,7 @@ public class SQLHandler {
                     addStatement.executeUpdate();
                 }
             }catch (SQLException e) {
-                System.out.println("SQLException occurred in SQLHandler.updateProductDB() near addition of new customer. Exception message: " + e.getMessage());
+                System.out.println("SQLException occurred in SQLHandler.updateProductDB() near addition of new Product. Exception message: " + e.getMessage());
             }
         }
 
@@ -143,7 +174,7 @@ public class SQLHandler {
                     updateStatement.setString(4,updatedProductsData.get(i).getId());
                     updateStatement.executeUpdate();
                 }catch (SQLException e) {
-                    System.out.println("SQLException occurred in SQLHandler.updateCustomerDB() near updation of existing customer. Exception message: " + e.getMessage());
+                    System.out.println("SQLException occurred in SQLHandler.updateCustomerDB() near updation of existing Product. Exception message: " + e.getMessage());
                 }
             }
         }
@@ -167,6 +198,12 @@ public class SQLHandler {
         }catch (SQLException e) {
             System.out.println("SQLException occurred in SQLHandler.getProductData(). Exception message: " + e.getMessage());
         }
+        if (productsData.size() > updatedProductsData.size()) {
+//            updatedProductsData.clear();
+            for (Product product : productsData) { //Also initialises the updatedProductsData
+                updatedProductsData.add(product);
+            }
+        }
     }
 
     /**
@@ -179,46 +216,103 @@ public class SQLHandler {
         return phoneNumber.matches("[1-9][0-9]{9}");
     }
 
-    public static int getInitialCustomers(){
+    /**
+     * Returns the number of customers who have created account
+     * @return int
+     */
+
+    public static int getNumberOfCustomers(){
         return customersData.size();
+    }
+
+    /**
+     * Returns the number of products present in the database
+     * @return int
+     */
+    public static int getNumberOfProducts(){
+        return productsData.size();
     }
 
     /**
      * Returns a boolean value after checking whether the user is present or not
      * @param phoneNumber A valid phoneNumber to check
-     * @return boolean
+     * @return Boolean
      */
     public boolean isUserPresent(String phoneNumber) {
-        SQLHandler.productsData.clear();
-        SQLHandler.getCustomerData();  //First fetch the data from database
-        for (Customer i: customersData){  //Then check for presence
-            if (i.getPhoneNumber().equals(phoneNumber))
+
+        for (Customer i: customersData){  // check for presence
+            if (i.getPhoneNumber().equalsIgnoreCase(phoneNumber))
                 return true;
         }
         return false;
     }
 
+    /**
+     * Returns a boolean value after checking whether the Product is present or not
+     * @param productId A valid phoneNumber to check
+     * @return Boolean
+     */
+
+    public boolean isProductPresent(String productId){
+        SQLHandler.productsData.clear();
+        SQLHandler.getProductData();
+        for (Product i: productsData){
+            if (i.getId().equalsIgnoreCase(productId))
+                return true;
+        }
+        return false;
+    }
+
+    public void sell(String productId, int quantity){//Just updates the updatedProductId, after billing call the updateProductDB
+        for (Product i: updatedProductsData){
+            if (i.getId().equalsIgnoreCase(productId))
+                i.setQuantity(i.getQuantity() - quantity);
+        }
+    }
+
+    public int getQuantity(String productId){
+        for (Product i: updatedProductsData){
+            if (i.getId().equalsIgnoreCase(productId))
+                return i.getQuantity();
+        }
+        return -1;
+    }
+
+    public Product getProduct(String productId){
+        for (Product i: productsData){
+            if(i.getId().equalsIgnoreCase(productId))
+                return i;
+        }
+        return null;
+    }
+
     private boolean addCustomer(Customer customer){
-        SQLHandler.getCustomerData();
         updatedCustomersData.add(customer);
         SQLHandler.updateCustomerDB();
         return true;
     }
 
+
     /**
      * Displays the Products after fetching them from the database.
      */
+
     public void showItems(){
-        SQLHandler.productsData.clear();
-        SQLHandler.getProductData(); //Fetch the products data
-        System.out.println("+-----+-----------------+------------+------------+");
-        System.out.printf("%-5S | %-15S | %-10S | %-10S |\n","ID","Name","Price","Quantity");
-        for (int j = 0; j < productsData.size(); j++) {
-            Product i = productsData.get(j);
-            System.out.printf("%-5s | %-15s | %-10.2f | %-10s |\n", i.getId(), i.getName(), i.getPrice(), i.getQuantity());
+//        SQLHandler.productsData.clear();
+//        SQLHandler.getProductData(); //Fetch the products data
+        System.out.println("+-------+-------------------------+----------+------------+");
+        System.out.printf("| %-5S | %-25S | %-10S | %-10S |\n","ID","Name","Price","Quantity");
+        for (Product i : updatedProductsData) { //Using updatedProductsList because if item is in cart then some quantity is reduced which is not updated in original products data array
+            System.out.printf("| %-5s | %-25s | %-10.2f | %-10s |\n", i.getId(), i.getName(), i.getPrice(), i.getQuantity());
         }
-        System.out.println("+-----+-----------------+------------+------------+");
+        System.out.println("+-------+-------------------------+----------+------------+");
     }
+
+
+    /**
+     * Handles the new customer signup process
+     * @return void
+     */
 
     public boolean customerSignUp(){
         String name;
@@ -295,9 +389,9 @@ public class SQLHandler {
 
             name = name.replace(" ","_");
             password = password.replace(" ", "");
-            Customer cust = new Customer(name,age,phoneNumber, password);
+            Customer newCustomer = new Customer(name,age,phoneNumber, password);
 
-            if (addCustomer(cust)) {
+            if (addCustomer(newCustomer)) {
                 System.out.println("Your account has been created. Now Please Login.");
                 return true;
             }
@@ -307,21 +401,19 @@ public class SQLHandler {
             }
     }
 
-    public Customer customerLogin(String mobileNumber, String password) {   //Incomplete still need to implement
+    public Customer customerLogin(String mobileNumber, String password) {
         for (Customer i: customersData){
             if (i.getPhoneNumber().equals(mobileNumber) && i.getPassword().equals(password)){
                 return i;
             }
         }
         return null;
-    }  //Will take mobile number and password, and check if user is present and password matches then it should return the
-    // customer object by constructing the customer object by extracting data from database
-    // and print
-
-    public static void main(String [] args){
-        SQLHandler.getProductData();
-
-        SQLHandler sql = new SQLHandler();
-        sql.showItems();
     }
+
+//    public static void main(String [] args){
+//        SQLHandler.getProductData();
+//
+//        SQLHandler sql = new SQLHandler();
+//        sql.showItems();
+//    }
 }

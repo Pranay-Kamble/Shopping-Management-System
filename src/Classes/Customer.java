@@ -1,24 +1,32 @@
 package Classes;
 
 
+import SQL.SQLHandler;
+
 public final class Customer extends Person {
-    private static int ID = 1;
+    public static int ID;
     private String phoneNumber;
     private String password;
     private String custId = "C";
     private double moneySpent;
 
-    public Customer() { } //Default Constructor
+
+    public Customer() {
+        ID = SQLHandler.initialCustomers + 1;
+        System.out.println("Cust ID: " + Customer.ID);
+    } //Default Constructor
 
     public Customer(String name, int age, String phoneNumber, String password) { //Parameterised Constructor
         super(name,age);
-        this.custId = this.custId + (Customer.ID++);
+        this.custId = "C" + (Customer.ID++);
         this.phoneNumber = phoneNumber;
         this.password = password;
     }
 
     public Customer(String custId, String name, int age, String phoneNumber,String password, double moneySpent){
-        this(name,age,phoneNumber,password);
+        super(name,age);
+        this.phoneNumber=phoneNumber;
+        this.password=password;
         this.custId = custId;
         this.moneySpent = moneySpent;
     }
