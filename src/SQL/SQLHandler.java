@@ -14,9 +14,13 @@ public class SQLHandler {
     private static final String User = "root";
     private static final String Password = "password";
     private static Connection connection = null;
+    @SuppressWarnings("FieldMayBeFinal")
     private static ArrayList<Customer> customersData = new ArrayList<>();
+    @SuppressWarnings("FieldMayBeFinal")
     private static ArrayList<Customer> updatedCustomersData = new ArrayList<>();
+    @SuppressWarnings("FieldMayBeFinal")
     private static ArrayList<Product> productsData = new ArrayList<>();
+    @SuppressWarnings("FieldMayBeFinal")
     private static ArrayList<Product> updatedProductsData = new ArrayList<>();
 
     public static int initialCustomers;
@@ -45,6 +49,7 @@ public class SQLHandler {
      * We make one call to the database and store the data in ArrayList
      */
 
+    @SuppressWarnings("UseBulkOperation")
     private static void getCustomerData()  {
         try{
             Statement statement = connection.createStatement();
@@ -75,7 +80,6 @@ public class SQLHandler {
         String updateQuery = "UPDATE USERS SET NAME = ? , AGE = ? , PHONENUMBER = ? , PASSWORD = ? , MONEYSPENT = ? WHERE ID = ?";
         PreparedStatement addStatement = null;
         PreparedStatement updateStatement = null;
-        System.out.println("Static customer id: " +  Customer.ID);
         try {
             addStatement = connection.prepareStatement(addQuery);
             updateStatement = connection.prepareStatement(updateQuery);
@@ -86,17 +90,8 @@ public class SQLHandler {
         if (customersData.size() < updatedCustomersData.size()){  //This means new customer have been added
             try {
                 System.out.println("Printing customer data array");
-                for (int i = 0; i < customersData.size(); i++) {
-                    System.out.println("Cust ID: " +  customersData.get(i).getId() + "\nName : " + customersData.get(i).getName() + "\nAge : " + customersData.get(i).getAge() + "\nPhoneNumber : " + customersData.get(i).getPhoneNumber() + "\nPassword : " + customersData.get(i).getPassword() + "\nMoneySpent : " + customersData.get(i).getMoneySpent());
-                }
-
-                System.out.println("Printing updated data array");
-                for (int i = 0; i < updatedCustomersData.size(); i++) {
-                    System.out.println("Cust ID: " +  updatedCustomersData.get(i).getId() + "\nName : " + updatedCustomersData.get(i).getName() + "\nAge : " + updatedCustomersData.get(i).getAge() + "\nPhoneNumber : " + updatedCustomersData.get(i).getPhoneNumber() + "\nPassword : " + updatedCustomersData.get(i).getPassword() + "\nMoneySpent : " + updatedCustomersData.get(i).getMoneySpent());
-                }
 
                 for (int i = customersData.size(); i < updatedCustomersData.size(); ++i) {
-//                    System.out.println("Cust ID: " +  updatedCustomersData.get(i).getId() + "\nName : " + updatedCustomersData.get(i).getName() + "\nAge : " + updatedCustomersData.get(i).getAge() + "\nPhoneNumber : " + updatedCustomersData.get(i).getPhoneNumber() + "\nPassword : " + updatedCustomersData.get(i).getPassword() + "\nMoneySpent : " + updatedCustomersData.get(i).getMoneySpent());
                     addStatement.setString(1, updatedCustomersData.get(i).getId());
                     addStatement.setString(2,updatedCustomersData.get(i).getName());
                     addStatement.setInt(3,updatedCustomersData.get(i).getAge());
@@ -138,6 +133,8 @@ public class SQLHandler {
      * Handles all the updation of data in items database, it can add new data and also update existing data
      */
 
+    //WIll be used by admin
+    @SuppressWarnings("unused")
     private static void updateProductDB() {
         String addQuery = "INSERT INTO ITEMS VALUES (?,?,?,?)";
         String updateQuery = "UPDATE ITEMS SET NAME = ? , PRICE = ? , QUANTITY = ? WHERE ID = ?";
@@ -185,6 +182,7 @@ public class SQLHandler {
      * We make one call to the database and store the data in ArrayList
      */
 
+    @SuppressWarnings("UseBulkOperation")
     private static void getProductData()  {
         try {
             Statement statement = connection.createStatement();
@@ -220,6 +218,7 @@ public class SQLHandler {
      * @return int
      */
 
+    @SuppressWarnings("unused")
     public static int getNumberOfCustomers(){
         return customersData.size();
     }
@@ -228,6 +227,7 @@ public class SQLHandler {
      * Returns the number of products present in the database
      * @return int
      */
+    @SuppressWarnings("unused")
     public static int getNumberOfProducts(){
         return productsData.size();
     }
@@ -262,6 +262,11 @@ public class SQLHandler {
         return false;
     }
 
+    /**
+     * Temporarily sells the product and reduces its quantity as items go into cart, and we do not know if they are purchased or not
+     * @param productId The productId of available product
+     * @param quantity The purchase quantity
+     */
     public void sell(String productId, int quantity){//Just updates the updatedProductId, after billing call the updateProductDB
         for (Product i: updatedProductsData){
             if (i.getId().equalsIgnoreCase(productId))
@@ -269,6 +274,24 @@ public class SQLHandler {
         }
     }
 
+
+    /**
+     * If items are removed from the cart they need to go back into the shelf
+     * @param productId The productId of product that is removed from the cart
+     * @param quantity The quantity of product that is removed from the cart
+     */
+    public void add(String productId, int quantity){
+        for (Product i: updatedProductsData){
+            if (i.getId().equalsIgnoreCase(productId))
+                i.setQuantity(i.getQuantity() + quantity);
+        }
+    }
+
+    /**
+     * Gives the quantity of product available
+     * @param productId ProductId of a product
+     * @return The available quantity
+     */
     public int getQuantity(String productId){
         for (Product i: updatedProductsData){
             if (i.getId().equalsIgnoreCase(productId))
@@ -277,6 +300,11 @@ public class SQLHandler {
         return -1;
     }
 
+    /**
+     * Sends the product as a whole
+     * @param productId ProductId of a product
+     * @return The corresponding product object or null if not present
+     */
     public Product getProduct(String productId){
         for (Product i: productsData){
             if(i.getId().equalsIgnoreCase(productId))
@@ -284,6 +312,12 @@ public class SQLHandler {
         }
         return null;
     }
+
+    /**
+     * Tries to add a new user to the database
+     * @param customer A new customer object
+     * @return boolean depending on successful or unsuccessful
+     */
 
     private boolean addCustomer(Customer customer){
         try {
@@ -303,8 +337,6 @@ public class SQLHandler {
      */
 
     public void showItems(){
-//        SQLHandler.productsData.clear();
-//        SQLHandler.getProductData(); //Fetch the products data
         System.out.println("+-------+---------------------------+------------+------------+");
         System.out.printf("| %-5S | %-25S | %-10S | %-10S |\n","ID","Name","Price","Quantity");
         for (Product i : updatedProductsData) { //Using updatedProductsList because if item is in cart then some quantity is reduced which is not updated in original products data array
@@ -313,10 +345,24 @@ public class SQLHandler {
         System.out.println("+-------+---------------------------+------------+------------+");
     }
 
+    /**
+     * Handles and updates the money spent by the customer
+     * @param customer  Customer for which we are updating the data
+     */
+
+    public void updateCustomerData(Customer customer){
+        for (Customer i: updatedCustomersData){
+            if (i.equals(customer)){
+                i.addMoneySpent(customer.getMoneySpent());
+            }
+        }
+        SQLHandler.updateCustomerDB();
+    }
+
 
     /**
      * Handles the new customer signup process
-     * @return void
+     * @return boolean value representing successful or unsuccessful process
      */
 
     public boolean customerSignUp(){
@@ -408,6 +454,12 @@ public class SQLHandler {
             }
     }
 
+    /**
+     * Handles the functionality if user is already present
+     * @param mobileNumber Mobile Number to check if user is present
+     * @param password Corresponding password of the user
+     * @return A customer object on successful login or else null
+     */
     public Customer customerLogin(String mobileNumber, String password) {
         for (Customer i: customersData){
             if (i.getPhoneNumber().equals(mobileNumber) && i.getPassword().equals(password)){
@@ -416,11 +468,4 @@ public class SQLHandler {
         }
         return null;
     }
-
-//    public static void main(String [] args){
-//        SQLHandler.getProductData();
-//
-//        SQLHandler sql = new SQLHandler();
-//        sql.showItems();
-//    }
 }

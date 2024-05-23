@@ -34,7 +34,9 @@ public final class Customer extends Person {
     public String getPassword() {
         return this.password;
     }
-    public int getAge() { return this.age; }
+    public int getAge() {
+        return this.age;
+    }
     public String getId() {
         return this.custId;
     }
@@ -56,6 +58,10 @@ public final class Customer extends Person {
             return false;
 
         return true;
+    }
+
+    public void addMoneySpent(double amount){
+        this.moneySpent += amount;
     }
 
     public boolean equals(Customer c){
