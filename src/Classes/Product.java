@@ -47,7 +47,7 @@ public final class Product {
     }
 
     public String toString(){
-        return String.format("| %-6s | %-15s | %-8.3f | %-8d |", this.productId, this.name,this.price, this.quantity);
+        return String.format("| %-5s | %-25s | %-10.2f | %-10s | ", this.productId, this.name,this.price, this.quantity);
 
     }
 

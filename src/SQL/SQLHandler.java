@@ -65,7 +65,6 @@ public class SQLHandler {
             System.out.println("SQLException occurred in SQLHandler.getCustomerData(). Exception message: " + e.getMessage());
         }
     }
-//TODO the newly created account is visible in the updatedCustomerData array twice why is this happening find and fix the bug
 
     /**
      * Handles all the updation of data in user database, it can add new data and also update existing data
@@ -97,7 +96,7 @@ public class SQLHandler {
                 }
 
                 for (int i = customersData.size(); i < updatedCustomersData.size(); ++i) {
-                    System.out.println("Cust ID: " +  updatedCustomersData.get(i).getId() + "\nName : " + updatedCustomersData.get(i).getName() + "\nAge : " + updatedCustomersData.get(i).getAge() + "\nPhoneNumber : " + updatedCustomersData.get(i).getPhoneNumber() + "\nPassword : " + updatedCustomersData.get(i).getPassword() + "\nMoneySpent : " + updatedCustomersData.get(i).getMoneySpent());
+//                    System.out.println("Cust ID: " +  updatedCustomersData.get(i).getId() + "\nName : " + updatedCustomersData.get(i).getName() + "\nAge : " + updatedCustomersData.get(i).getAge() + "\nPhoneNumber : " + updatedCustomersData.get(i).getPhoneNumber() + "\nPassword : " + updatedCustomersData.get(i).getPassword() + "\nMoneySpent : " + updatedCustomersData.get(i).getMoneySpent());
                     addStatement.setString(1, updatedCustomersData.get(i).getId());
                     addStatement.setString(2,updatedCustomersData.get(i).getName());
                     addStatement.setInt(3,updatedCustomersData.get(i).getAge());
@@ -287,9 +286,15 @@ public class SQLHandler {
     }
 
     private boolean addCustomer(Customer customer){
-        updatedCustomersData.add(customer);
-        SQLHandler.updateCustomerDB();
-        return true;
+        try {
+            updatedCustomersData.add(customer);
+            SQLHandler.updateCustomerDB();
+            return true;
+        }
+        catch(Exception e){
+            System.out.println("Exception occurred in SQLHandler.addCustomer(). Exception message: " + e.getMessage());
+            return false;
+        }
     }
 
 
@@ -300,12 +305,12 @@ public class SQLHandler {
     public void showItems(){
 //        SQLHandler.productsData.clear();
 //        SQLHandler.getProductData(); //Fetch the products data
-        System.out.println("+-------+-------------------------+----------+------------+");
+        System.out.println("+-------+---------------------------+------------+------------+");
         System.out.printf("| %-5S | %-25S | %-10S | %-10S |\n","ID","Name","Price","Quantity");
         for (Product i : updatedProductsData) { //Using updatedProductsList because if item is in cart then some quantity is reduced which is not updated in original products data array
             System.out.printf("| %-5s | %-25s | %-10.2f | %-10s |\n", i.getId(), i.getName(), i.getPrice(), i.getQuantity());
         }
-        System.out.println("+-------+-------------------------+----------+------------+");
+        System.out.println("+-------+---------------------------+------------+------------+");
     }
 
 
@@ -356,10 +361,12 @@ public class SQLHandler {
                 }
                 catch (CustomerAlreadyPresent | InvalidPhoneNumberException exception){
                     System.out.println("Exception: " + exception.getMessage());
+                    return false;
                 }
                 catch (Exception exception){
                     System.out.println("In Parent Exception of phone number");
                     System.out.println(exception.getMessage());
+                    return false;
                 }
             } while (!(phoneNumber.matches("[1-9][0-9]{9}")));
 
