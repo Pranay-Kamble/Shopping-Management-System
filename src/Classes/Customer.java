@@ -4,7 +4,7 @@ package Classes;
 import SQL.SQLHandler;
 
 public final class Customer extends Person {
-    public static int ID;
+    private static int ID;
     private String phoneNumber;
     private String password;
     private String custId = "C";
@@ -29,6 +29,10 @@ public final class Customer extends Person {
         this.password=password;
         this.custId = custId;
         this.moneySpent = moneySpent;
+    }
+
+    public Customer(Customer customer) {
+        this(customer.getId(),customer.getName(),customer.getAge(),customer.getPhoneNumber(),customer.getPassword(),customer.getMoneySpent());
     }
 
     public String getPassword() {
@@ -60,11 +64,16 @@ public final class Customer extends Person {
         return true;
     }
 
-    public void addMoneySpent(double amount){
-        this.moneySpent += amount;
+    public void addMoneySpent(double spentAmount){
+        this.moneySpent += spentAmount;
     }
 
     public boolean equals(Customer c){
         return this.name.equals(c.name) && this.age == c.age && this.password.equals(c.password) && this.phoneNumber.equals(c.phoneNumber);
+    }
+
+    public String toString(){
+        return "\nUser Name: " + this.name +  "\nUser ID: " + this.custId + "\nAge: " + this.age + "\nPhone Number: " + this.phoneNumber + "\nMoneySpent: " + this.moneySpent ;
+
     }
 }

@@ -1,6 +1,8 @@
 package SQL;
 
 import java.sql.*;
+
+import Classes.Admin;
 import Classes.Customer;
 import Classes.Product;
 import Exceptions.CustomerAlreadyPresent;
@@ -22,6 +24,8 @@ public class SQLHandler {
     private static ArrayList<Product> productsData = new ArrayList<>();
     @SuppressWarnings("FieldMayBeFinal")
     private static ArrayList<Product> updatedProductsData = new ArrayList<>();
+
+    private static ArrayList<Admin> adminsData = new ArrayList<> ();
 
     public static int initialCustomers;
     public static int initialProducts;
@@ -63,7 +67,7 @@ public class SQLHandler {
             if (customersData.size() > updatedCustomersData.size() || updatedCustomersData.isEmpty()) {
 
                 for (Customer customer : customersData) {
-                    updatedCustomersData.add(customer);
+                    updatedCustomersData.add(new Customer(customer)); //To avoid reference data type
                 }
             }
         }catch (SQLException e) {
@@ -77,7 +81,7 @@ public class SQLHandler {
 
     private static void updateCustomerDB()  {
         String addQuery = "INSERT INTO USERS VALUES (?,?,?,?,?,?)";
-        String updateQuery = "UPDATE USERS SET NAME = ? , AGE = ? , PHONENUMBER = ? , PASSWORD = ? , MONEYSPENT = ? WHERE ID = ?";
+        String updateQuery = "UPDATE USERS SET MONEYSPENT = ? WHERE ID = ?";
         PreparedStatement addStatement = null;
         PreparedStatement updateStatement = null;
         try {
@@ -89,7 +93,6 @@ public class SQLHandler {
 
         if (customersData.size() < updatedCustomersData.size()){  //This means new customer have been added
             try {
-                System.out.println("Printing customer data array");
 
                 for (int i = customersData.size(); i < updatedCustomersData.size(); ++i) {
                     addStatement.setString(1, updatedCustomersData.get(i).getId());
@@ -103,17 +106,16 @@ public class SQLHandler {
             }catch (SQLException e) {
                 System.out.println("SQLException occurred in SQLHandler.updateCustomerDB() near addition of new customer. Exception message: " + e.getMessage());
             }
+            SQLHandler.getCustomerData();
         }
 
+
         for (int i = 0 ; i < customersData.size(); ++i) {
-            if (!customersData.get(i).equals(updatedCustomersData.get(i))) {
+            if (customersData.get(i).getMoneySpent() != updatedCustomersData.get(i).getMoneySpent()) {
                 try{
-                    updateStatement.setString(1, updatedCustomersData.get(i).getName());
-                    updateStatement.setInt(2,updatedCustomersData.get(i).getAge());
-                    updateStatement.setString(3,updatedCustomersData.get(i).getPhoneNumber());
-                    updateStatement.setString(4,updatedCustomersData.get(i).getPassword());
-                    updateStatement.setDouble(5,updatedCustomersData.get(i).getMoneySpent());
-                    updateStatement.setString(6,updatedCustomersData.get(i).getId());
+                    updateStatement.setDouble(1,updatedCustomersData.get(i).getMoneySpent());
+                    updateStatement.setString(2,updatedCustomersData.get(i).getId());
+                    System.out.println(updateStatement.toString());
                     updateStatement.executeUpdate();
                 }catch (SQLException e) {
                     System.out.println("SQLException occurred in SQLHandler.updateCustomerDB() near updation of existing customer. Exception message: " + e.getMessage());
@@ -126,14 +128,12 @@ public class SQLHandler {
         updatedProductsData.clear();
         getCustomerData();
         getProductData();
-
     }
 
     /**
      * Handles all the updation of data in items database, it can add new data and also update existing data
      */
 
-    //WIll be used by admin
     @SuppressWarnings("unused")
     private static void updateProductDB() {
         String addQuery = "INSERT INTO ITEMS VALUES (?,?,?,?)";
@@ -201,6 +201,10 @@ public class SQLHandler {
                 updatedProductsData.add(product);
             }
         }
+    }
+
+    private void getAdminData(){
+
     }
 
     /**
@@ -331,7 +335,6 @@ public class SQLHandler {
         }
     }
 
-
     /**
      * Displays the Products after fetching them from the database.
      */
@@ -352,13 +355,13 @@ public class SQLHandler {
 
     public void updateCustomerData(Customer customer){
         for (Customer i: updatedCustomersData){
+
             if (i.equals(customer)){
                 i.addMoneySpent(customer.getMoneySpent());
             }
         }
         SQLHandler.updateCustomerDB();
     }
-
 
     /**
      * Handles the new customer signup process
@@ -388,7 +391,6 @@ public class SQLHandler {
                     if (console.hasNextLine())
                         console.nextLine();
                 }
-
 
             }while (age < 1);
             console.nextLine();
@@ -468,4 +470,8 @@ public class SQLHandler {
         }
         return null;
     }
+
+//    public Admin adminLogin(String adminId, String password) {
+//
+//    }
 }
