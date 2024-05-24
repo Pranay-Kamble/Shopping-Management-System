@@ -74,6 +74,9 @@ public final class Customer extends Person {
 
     public String toString(){
         return "\nUser Name: " + this.name +  "\nUser ID: " + this.custId + "\nAge: " + this.age + "\nPhone Number: " + this.phoneNumber + "\nMoneySpent: " + this.moneySpent ;
+    }
 
+    public String toLine() {
+        return String.format("| %-5S | %-25S | %-4d | %-12S | %-11.3f |", this.custId, this.name, this.age, this.phoneNumber ,this.moneySpent);
     }
 }

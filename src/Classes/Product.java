@@ -4,9 +4,6 @@ import SQL.SQLHandler;
 
 public final class Product {
     private static int ID;
-    static {
-        ID = SQLHandler.initialProducts + 1;
-    }
 
     private String name;
     private double price;
@@ -21,7 +18,9 @@ public final class Product {
     public int getQuantity() {return this.quantity;}
 
 
-    public Product() { }
+    public Product() {
+        Product.ID = SQLHandler.initialProducts + 1;
+    }
 
     public Product(Product copy) {
         this.productId = copy.productId;
@@ -34,7 +33,7 @@ public final class Product {
         this.name = name;
         this.price = price;
         this.quantity = quantity;
-        this.productId = this.productId + (Product.ID++);
+        this.productId = this.productId + (Product.ID < 10 ? "00" + Product.ID++ : "0"+Product.ID++ );
     }
 
     public void setQuantity(int quantity) {
@@ -42,13 +41,14 @@ public final class Product {
     }
 
     public Product(String productId, String name, double price, int quantity){
-        this(name,price,quantity);
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
         this.productId = productId;
     }
 
     public String toString(){
         return String.format("| %-5s | %-25s | %-10.2f | %-10s | ", this.productId, this.name,this.price, this.quantity);
-
     }
 
     public boolean equals(Object other){
@@ -56,6 +56,10 @@ public final class Product {
             return this.productId.equalsIgnoreCase(((Product)other).productId);
         }
         return false;
+    }
+
+    public boolean equals(Product other){
+        return (this.productId.equalsIgnoreCase(other.productId)) && (this.quantity == other.quantity);
     }
 
 }
